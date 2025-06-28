@@ -1,0 +1,83 @@
+/* Стили для .index_great */
+.index_great {
+  background-color: #000000; /* Чёрный фон */
+  color: white; /* Белый текст */
+  min-height: 100vh; /* Занимает всю высоту экрана */
+  display: flex;
+  flex-direction: column; /* Вертикальное выравнивание */
+  align-items: center; /* Центрирование по горизонтали */
+  justify-content: space-between; /* Распределение элементов вертикально */
+}
+
+/* Стили для заголовка и подзаголовка */
+.text-center {
+  text-align: center;
+}
+
+/* Стили для кнопки */
+.btn-primary {
+  background-color: #0d6efd; /* Синий цвет кнопки */
+  border-color: #0d6efd; /* Граница кнопки */
+  font-weight: bold; /* Жирный шрифт */
+  padding: 10px 20px; /* Поля кнопки */
+  transition: background-color 0.3s ease; /* Анимация при наведении */
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7; /* Изменение цвета при наведении */
+}
+
+/* Стили для изображений */
+.image-slider {
+  position: relative;
+  width: 426px;
+  height: 459px;
+}
+
+.cat-image {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  border-radius: 10px;
+}
+
+.cat-image.active {
+  display: block;
+}
+
+/* Стили для загрузки */
+#upload-status {
+    display: none; /* Скрыть по умолчанию */
+}
+
+#upload-message {
+    font-size: 0.9rem;
+}
+
+#file-input {
+    display: none; /* Скрываем стандартный input file */
+}
+
+#browse-file-btn {
+    cursor: pointer;
+}
+
+#image-url {
+    background-color: #f8f9fa;
+}
+
+/* Стили для кнопки удаления */
+.delete-btn {
+    background-color: #ff4d4f; /* Красный фон */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    background-color: #e74c3c; /* Темнее при наведении */
+}

@@ -1,15 +1,54 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Сервер хранения картинок</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link href="/static/styles.css" rel="stylesheet">
 </head>
-<body>
-<h1>Сервис хранения картинок</h1>
-    <ul>
-        <li><a href="/">Главная</a></li>
-        <li><a href="/upload">Upload</a></li>
-        <li><a href="/images">Images</a></li>
-    </ul>
+<body class="d-flex flex-column vh-100">
+    <header>
+        <nav class="navbar navbar-expand-lg bg-warning">
+          <div class="container-fluid d-flex justify-content-between align-items-center">
+
+            <!-- Левая часть -->
+            <a class="navbar-brand" href="/"><b>Сервер хранения изображений</b></a>
+
+            <!-- Кнопка для мобильных -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup"
+                    aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Правая часть (меню) -->
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
+              <div class="navbar-nav">
+                <a class="nav-link" href="/upload">Загрузка изображений</a>
+                <a class="nav-link" href="/images">Список изображений</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+    </header>
+    <section class="index_great flex-grow-1 d-flex flex-column align-items-center justify-content-center">
+      <div class="text-center mb-5">
+        <h1 class="text-white">Загрузить изображения</h1>
+        <p class="text-white">Загружайте сюда селфи, мемы или любые забавные картинки.</p>
+      </div>
+
+      <a href="/upload" class="btn btn-primary mb-5">ЗАГРУЗКА ФАЙЛА</a>
+
+      <div class="image-slider">
+        <img src="/static/images/cat.png" alt="Cat Image" class="cat-image active" style="width: 426px; height: 459px;">
+        <img src="/static/images/bird.png" alt="Bird Image" class="cat-image" style="width: 326px; height: 459px;">
+        <img src="/static/images/dog1.png" alt="Dog1 Image" class="cat-image" style="width: 326px; height: 459px;">
+        <img src="/static/images/dog2.png" alt="Dog2 Image" class="cat-image" style="width: 426px; height: 459px;">
+        <img src="/static/images/dog3.png" alt="Dog3 Image" class="cat-image" style="width: 426px; height: 459px;">
+      </div>
+    </section>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+<script src="/static/script.js"></script>
 </body>
 </html>
