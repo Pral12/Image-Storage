@@ -1,13 +1,13 @@
+import json
 import uvicorn
 import os
 from pathlib import Path
-from fastapi import FastAPI, Request, UploadFile, File, HTTPException
-from fastapi.responses import HTMLResponse, PlainTextResponse
+from fastapi import FastAPI, Request, UploadFile, File, HTTPException, Form
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from starlette.responses import JSONResponse
 
-from utils.file_utils import is_allowed_file, MAX_FILE_SIZE, ALLOWED_EXTENSIONS, is_file_size, get_unique_filename, THUMBNAIL_SIZE, create_thumbnail
+from utils.file_utils import is_allowed_file, MAX_FILE_SIZE, ALLOWED_EXTENSIONS, is_file_size, get_unique_filename, create_thumbnail
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -36,9 +36,10 @@ async def get_upload(request: Request):
     return templates.TemplateResponse("upload.html", {"request": context})
 
 @app.post("/upload/")
-async def post_upload(file: UploadFile = File(...)):
+async def post_upload(file: UploadFile = File(...), comment: str = Form("")):
     my_file = Path(file.filename)
     content = await file.read()
+
 
     # Проверка расширения
     if not is_allowed_file(my_file):
@@ -60,13 +61,26 @@ async def post_upload(file: UploadFile = File(...)):
     with open(save_path, "wb") as buffer:
         buffer.write(content)
 
+
     # Создание миниатюры
     thumbnail_path = THUMBNAIL_DIR / new_file_name
     create_thumbnail(save_path, thumbnail_path)
 
-    # Возвращаем URL
-    file_url = f"/images/{new_file_name}"
-    return JSONResponse({"url": file_url})
+    # Сохраняем комментарий
+    comment_path = IMAGE_DIR / "comments.json"
+
+    if comment_path.exists():
+        with open(comment_path, "r") as f:
+            comments = json.load(f)
+    else:
+        comments = {}
+
+    comments[new_file_name] = comment
+
+    with open(comment_path, "w") as f:
+        json.dump(comments, f, indent=2)
+
+    return JSONResponse({"url": f"/images/{new_file_name}"})
 
 @app.get("/images", response_class=HTMLResponse)
 async def images_page(request: Request):
@@ -77,15 +91,24 @@ async def images_page(request: Request):
 @app.get("/api/images")
 async def get_images():
     image_files = []
+    comment_path = IMAGE_DIR / "comments.json"
+    comments = {}
+
+    if comment_path.exists():
+        with open(comment_path, "r") as f:
+            comments = json.load(f)
+
     for file in IMAGE_DIR.iterdir():
-        if file.is_file():
+        if file.is_file() and file.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif"]:
             thumbnail_url = f"/thumbnails/{file.name}"
             image_files.append({
                 "id": file.stem,
                 "name": file.name,
                 "url": f"/images/{file.name}",
-                "thumbnail_url": thumbnail_url
+                "thumbnail_url": thumbnail_url,
+                "comment": comments.get(file.name, "")
             })
+
     return image_files
 
 # Эндпоинт для удаления изображения

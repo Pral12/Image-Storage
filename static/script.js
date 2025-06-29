@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadMessage = document.getElementById('upload-message');
     const imageUrlInput = document.getElementById('image-url');
     const copyBtn = document.getElementById('copy-btn');
+    const commentInput = document.getElementById('comment-input');
 
     // Открыть диалог выбора файла при клике на кнопку
     browseBtn.addEventListener('click', () => {
@@ -55,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const formData = new FormData();
             formData.append('file', file);
-
+            formData.append("comment", commentInput.value.trim());
             const response = await fetch('/upload', {
                 method: 'POST',
                 body: formData,
@@ -127,11 +128,14 @@ document.addEventListener('DOMContentLoaded', () => {
         images.forEach(image => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td><img src="${image.thumbnail_url}" alt="${image.name}" style="max-width: 100px; max-height: 100px;"></td>
+                <td><img src="${image.thumbnail_url}" alt="Thumbnail" style="width: 100px;"></td>
                 <td>${image.name}</td>
+                <td>${image.comment || '<em>нет</em>'}</td>
                 <td><a href="${image.url}" target="_blank">${image.url}</a></td>
                 <td>
-                    <button class="delete-btn" data-id="${image.id}"><i class="bi bi-trash-fill"></i></button>
+                    <button class="delete-btn btn btn-sm btn-danger" data-id="${image.id}">
+                        <i class="bi bi-trash-fill"></i>
+                    </button>
                 </td>
             `;
             imageList.appendChild(row);
