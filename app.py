@@ -7,14 +7,20 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import JSONResponse
 
-from utils.file_utils import is_allowed_file, MAX_FILE_SIZE, ALLOWED_EXTENSIONS, is_file_size, get_unique_filename
+from utils.file_utils import is_allowed_file, MAX_FILE_SIZE, ALLOWED_EXTENSIONS, is_file_size, get_unique_filename, THUMBNAIL_SIZE, create_thumbnail
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/images", StaticFiles(directory="images"), name="images")
+app.mount("/templates", StaticFiles(directory="templates"), name="templates")
+app.mount("/thumbnails", StaticFiles(directory="thumbnails"), name="thumbnails")
 templates = Jinja2Templates(directory="templates")
 IMAGE_DIR = Path("images")
 IMAGE_DIR.mkdir(exist_ok=True)
+THUMBNAIL_DIR = Path("thumbnails")
+THUMBNAIL_DIR.mkdir(exist_ok=True)
+TEMPLATES_DIR = Path("templates")
+TEMPLATES_DIR.mkdir(exist_ok=True)
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
@@ -31,19 +37,17 @@ async def get_upload(request: Request):
 
 @app.post("/upload/")
 async def post_upload(file: UploadFile = File(...)):
-    """Загрузка изображения"""
-
     my_file = Path(file.filename)
     content = await file.read()
 
-    # Проверка файла на расширение
+    # Проверка расширения
     if not is_allowed_file(my_file):
         raise HTTPException(
             status_code=400,
             detail=f"Неверное расширение файла. Допустимы: {' '.join(ALLOWED_EXTENSIONS)}"
         )
 
-    # Проверка размера файла
+    # Проверка размера
     if not is_file_size(file.size):
         raise HTTPException(
             status_code=400,
@@ -52,14 +56,15 @@ async def post_upload(file: UploadFile = File(...)):
 
     # Генерация уникального имени и сохранение
     new_file_name = get_unique_filename(my_file)
-    image_dir = Path("images")
-    image_dir.mkdir(exist_ok=True)  # Создаём папку, если её нет
-    save_path = image_dir / new_file_name
-
+    save_path = IMAGE_DIR / new_file_name
     with open(save_path, "wb") as buffer:
         buffer.write(content)
 
-    # Возвращаем URL или сообщение
+    # Создание миниатюры
+    thumbnail_path = THUMBNAIL_DIR / new_file_name
+    create_thumbnail(save_path, thumbnail_path)
+
+    # Возвращаем URL
     file_url = f"/images/{new_file_name}"
     return JSONResponse({"url": file_url})
 
@@ -68,29 +73,34 @@ async def images_page(request: Request):
     context = {"request": request}
     return templates.TemplateResponse("images.html", {"request": context})
 
-@app.get("/api/images", response_model=list)
+# Эндпоинт для получения списка изображений
+@app.get("/api/images")
 async def get_images():
-    """Получение списка изображений"""
-    images = []
-    for file_path in IMAGE_DIR.iterdir():
-        if file_path.is_file():
-            images.append({
-                "id": file_path.stem,
-                "name": file_path.name,
-                "url": f"/images/{file_path.name}"
+    image_files = []
+    for file in IMAGE_DIR.iterdir():
+        if file.is_file():
+            thumbnail_url = f"/thumbnails/{file.name}"
+            image_files.append({
+                "id": file.stem,
+                "name": file.name,
+                "url": f"/images/{file.name}",
+                "thumbnail_url": thumbnail_url
             })
-    return images
+    return image_files
 
 # Эндпоинт для удаления изображения
 @app.delete("/api/images/{image_id}")
 async def delete_image(image_id: str):
-    """Удаление изображения по ID"""
-    file_path = IMAGE_DIR / f"{image_id}.png"  # Пример расширения .png
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="Image not found")
+    for ext in [".jpg", ".jpeg", ".png", ".gif"]:
+        file_path = IMAGE_DIR / f"{image_id}{ext}"
+        thumbnail_path = THUMBNAIL_DIR / f"{image_id}{ext}"
+        if file_path.exists():
+            os.remove(file_path)
+            if thumbnail_path.exists():
+                os.remove(thumbnail_path)
+            return {"message": "Image deleted successfully"}
 
-    os.remove(file_path)
-    return {"message": "Image deleted successfully"}
+    raise HTTPException(status_code=404, detail="Image not found")
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)

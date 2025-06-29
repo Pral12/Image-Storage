@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const images = await response.json();
             renderImages(images);
         } catch (error) {
-            console.error('Ошибка загрузки изображений:', error);
+            console.error('Ошибка загрузки изображений: ', error);
         }
     }
 
@@ -127,6 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
         images.forEach(image => {
             const row = document.createElement('tr');
             row.innerHTML = `
+                <td><img src="${image.thumbnail_url}" alt="${image.name}" style="max-width: 100px; max-height: 100px;"></td>
                 <td>${image.name}</td>
                 <td><a href="${image.url}" target="_blank">${image.url}</a></td>
                 <td>
@@ -155,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Обновляем список после удаления
                 fetchImages();
             } catch (error) {
-                console.error('Ошибка удаления изображения:', error);
+                console.error('Ошибка удаления изображения: ', error);
             }
         }
     });

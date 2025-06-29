@@ -1,10 +1,23 @@
 from pathlib import Path
 import uuid
+from PIL import Image
+import logging
 
 
+logging.basicConfig(level=logging.INFO)
 ALLOWED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif']
 MAX_FILE_SIZE = 5 * 1024 * 1024
+THUMBNAIL_SIZE = (100, 100)
 
+
+def create_thumbnail(image_path, thumbnail_path):
+    try:
+        with Image.open(image_path) as img:
+            img.thumbnail(THUMBNAIL_SIZE)
+            img.save(thumbnail_path)
+            logging.info(f"Thumbnail created: {thumbnail_path}")
+    except Exception as e:
+        logging.error(f"Error creating thumbnail: {e}")
 
 def is_allowed_file(filename: Path) -> bool:
     """ Проверка правильности расширения из списка ALLOWED_EXTENSIONS"""
